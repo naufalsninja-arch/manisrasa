@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Menu; // ✅ INI WAJIB
+use App\Models\Menu;
+use Illuminate\Support\Facades\File;
 
 class AdminMenuController extends Controller
 {
@@ -13,53 +14,57 @@ class AdminMenuController extends Controller
         return view('admin.adminmenu', compact('menus'));
     }
 
-public function store(Request $request)
-{
-    $imageName = null;
+    public function store(Request $request)
+    {
+        $imageName = null;
 
-    if ($request->hasFile('gambar')) {
-        $imageName = time() . '.' . $request->gambar->extension();
-        
-        // Gunakan path langsung tanpa modifikasi izin folder
-        $request->gambar->move(public_path('images'), $imageName);
+        if ($request->hasFile('gambar')) {
+            // Beri nama file unik pakai angka
+            $imageName = time() . '.' . $request->gambar->extension();
+            
+            // Simpan ke public/images (pastikan folder ini ada di VS Code kamu)
+            $request->gambar->move(public_path('images'), $imageName);
+        }
+
+        Menu::create([
+            'nama_menu' => $request->nama_menu,
+            'deskripsi' => $request->deskripsi,
+            'harga' => $request->harga,
+            'gambar' => $imageName
+        ]);
+
+        return back();
     }
-
-    Menu::create([
-        'nama_menu' => $request->nama_menu,
-        'deskripsi' => $request->deskripsi,
-        'harga' => $request->harga,
-        'gambar' => $imageName
-    ]);
-
-    return back();
-}
 
     public function update(Request $request, $id)
-{
-    $menu = Menu::find($id);
-    $data = $request->all();
+    {
+        $menu = Menu::find($id);
+        $data = $request->all();
 
-    if ($request->hasFile('gambar')) {
-        // 1. Buat nama file baru
-        $imageName = time() . '.' . $request->gambar->extension();
-        
-        // 2. Pindahkan ke folder public/images
-        $request->gambar->move(public_path('images'), $imageName);
-        
-        // 3. Masukkan nama file baru ke data yang akan diupdate
-        $data['gambar'] = $imageName;
-    } else {
-        // Jika tidak upload gambar baru, tetap pakai gambar yang lama
-        unset($data['gambar']);
+        if ($request->hasFile('gambar')) {
+            $imageName = time() . '.' . $request->gambar->extension();
+            $request->gambar->move(public_path('images'), $imageName);
+            $data['gambar'] = $imageName;
+        } else {
+            // Kalau tidak upload gambar baru, buang field gambar dari array update
+            // Supaya data gambar lama di database tidak tertimpa/hilang
+            unset($data['gambar']);
+        }
+
+        $menu->update($data);
+        return back();
     }
-
-    $menu->update($data);
-    return back();
-}
 
     public function destroy($id)
     {
-        Menu::find($id)->delete();
+        $menu = Menu::find($id);
+        
+        // Hapus file fisik di folder kalau ada (Opsional tapi bagus buat kebersihan)
+        if ($menu->gambar && file_exists(public_path('images/' . $menu->gambar))) {
+            @unlink(public_path('images/' . $menu->gambar));
+        }
+
+        $menu->delete();
         return back();
     }
 }
