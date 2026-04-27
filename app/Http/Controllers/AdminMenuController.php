@@ -18,12 +18,10 @@ public function store(Request $request)
     $imageName = null;
 
     if ($request->hasFile('gambar')) {
-        $file = $request->file('gambar');
-        $imageName = time() . '.' . $file->extension();
+        $imageName = time() . '.' . $request->gambar->extension();
         
-        // Simpan ke folder storage/app/public/images
-        // Ini cara yang lebih aman di server hosting
-        $file->storeAs('public/images', $imageName);
+        // Simpan LANGSUNG ke public/images
+        $request->gambar->move(public_path('images'), $imageName);
     }
 
     Menu::create([
