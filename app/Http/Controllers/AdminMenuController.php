@@ -13,13 +13,17 @@ class AdminMenuController extends Controller
         return view('admin.adminmenu', compact('menus'));
     }
 
-    public function store(Request $request)
+public function store(Request $request)
 {
     $imageName = null;
 
     if ($request->hasFile('gambar')) {
-        $imageName = time() . '.' . $request->gambar->extension();
-        $request->gambar->move(public_path('images'), $imageName);
+        $file = $request->file('gambar');
+        $imageName = time() . '.' . $file->extension();
+        
+        // Simpan ke folder storage/app/public/images
+        // Ini cara yang lebih aman di server hosting
+        $file->storeAs('public/images', $imageName);
     }
 
     Menu::create([
