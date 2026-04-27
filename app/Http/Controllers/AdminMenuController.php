@@ -17,11 +17,10 @@ class AdminMenuController extends Controller
     public function store(Request $request)
     {
         $imageName = null;
-
         if ($request->hasFile('gambar')) {
             $imageName = time() . '.' . $request->gambar->extension();
-            // Simpan ke storage/app/public/images
-            $request->file('gambar')->storeAs('public/images', $imageName);
+            // Simpan langsung ke public/images (Konsisten)
+            $request->gambar->move(public_path('images'), $imageName);
         }
 
         Menu::create([
@@ -30,7 +29,6 @@ class AdminMenuController extends Controller
             'harga' => $request->harga,
             'gambar' => $imageName
         ]);
-
         return back();
     }
 
@@ -41,8 +39,8 @@ class AdminMenuController extends Controller
 
         if ($request->hasFile('gambar')) {
             $imageName = time() . '.' . $request->gambar->extension();
-            // Gunakan storeAs agar konsisten dengan store
-            $request->file('gambar')->storeAs('public/images', $imageName);
+            // SAMAKAN: Pakai move ke public/images, jangan storeAs
+            $request->gambar->move(public_path('images'), $imageName);
             $data['gambar'] = $imageName;
         } else {
             // Tetap pakai gambar lama jika tidak ada upload baru
@@ -57,8 +55,11 @@ class AdminMenuController extends Controller
     {
         $menu = Menu::find($id);
         
-        // Untuk cara storage, unlink-nya harus ke path storage jika ingin dihapus
-        // Tapi ini opsional, boleh dibiarkan dulu agar tidak menambah error
+        // Hapus file di folder public/images agar tidak menumpuk (Opsional)
+        if ($menu->gambar && file_exists(public_path('images/' . $menu->gambar))) {
+            @unlink(public_path('images/' . $menu->gambar));
+        }
+
         $menu->delete();
         return back();
     }
