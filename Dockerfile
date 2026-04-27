@@ -28,6 +28,8 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # 8. Buka port 80
 EXPOSE 80
 
+RUN php artisan storage:link
+
 # 9. JALANKAN MIGRASI OTOMATIS & NYALAKAN SERVER
 # Ini akan membuat tabel di TiDB setiap kali aplikasi dijalankan
 CMD php artisan migrate --force && apache2-foreground
