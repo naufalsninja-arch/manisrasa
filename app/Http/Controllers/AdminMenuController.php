@@ -35,10 +35,27 @@ public function store(Request $request)
 }
 
     public function update(Request $request, $id)
-    {
-        Menu::find($id)->update($request->all());
-        return back();
+{
+    $menu = Menu::find($id);
+    $data = $request->all();
+
+    if ($request->hasFile('gambar')) {
+        // 1. Buat nama file baru
+        $imageName = time() . '.' . $request->gambar->extension();
+        
+        // 2. Pindahkan ke folder public/images
+        $request->gambar->move(public_path('images'), $imageName);
+        
+        // 3. Masukkan nama file baru ke data yang akan diupdate
+        $data['gambar'] = $imageName;
+    } else {
+        // Jika tidak upload gambar baru, tetap pakai gambar yang lama
+        unset($data['gambar']);
     }
+
+    $menu->update($data);
+    return back();
+}
 
     public function destroy($id)
     {
