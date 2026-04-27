@@ -14,42 +14,26 @@ class AdminMenuController extends Controller
         return view('admin.adminmenu', compact('menus'));
     }
 
-   public function store(Request $request)
-{
-    $imageName = null;
+    public function store(Request $request)
+    {
+        $imageName = null;
 
-    if ($request->hasFile('gambar')) {
-        $imageName = time() . '.' . $request->gambar->extension();
-        // Simpan ke storage/app/public/images
-        $request->file('gambar')->storeAs('public/images', $imageName);
+        if ($request->hasFile('gambar')) {
+            $imageName = time() . '.' . $request->gambar->extension();
+            // Simpan ke storage/app/public/images
+            $request->file('gambar')->storeAs('public/images', $imageName);
+        }
+
+        Menu::create([
+            'nama_menu' => $request->nama_menu,
+            'deskripsi' => $request->deskripsi,
+            'harga' => $request->harga,
+            'gambar' => $imageName
+        ]);
+
+        return back();
     }
 
-    Menu::create([
-        'nama_menu' => $request->nama_menu,
-        'deskripsi' => $request->deskripsi,
-        'harga' => $request->harga,
-        'gambar' => $imageName
-    ]);
-
-    return back();
-}
-
-public function update(Request $request, $id)
-{
-    $menu = Menu::find($id);
-    $data = $request->all();
-
-    if ($request->hasFile('gambar')) {
-        $imageName = time() . '.' . $request->gambar->extension();
-        $request->file('gambar')->storeAs('public/images', $imageName);
-        $data['gambar'] = $imageName;
-    } else {
-        unset($data['gambar']);
-    }
-
-    $menu->update($data);
-    return back();
-}
     public function update(Request $request, $id)
     {
         $menu = Menu::find($id);
@@ -57,11 +41,11 @@ public function update(Request $request, $id)
 
         if ($request->hasFile('gambar')) {
             $imageName = time() . '.' . $request->gambar->extension();
-            $request->gambar->move(public_path('images'), $imageName);
+            // Gunakan storeAs agar konsisten dengan store
+            $request->file('gambar')->storeAs('public/images', $imageName);
             $data['gambar'] = $imageName;
         } else {
-            // Kalau tidak upload gambar baru, buang field gambar dari array update
-            // Supaya data gambar lama di database tidak tertimpa/hilang
+            // Tetap pakai gambar lama jika tidak ada upload baru
             unset($data['gambar']);
         }
 
@@ -73,11 +57,8 @@ public function update(Request $request, $id)
     {
         $menu = Menu::find($id);
         
-        // Hapus file fisik di folder kalau ada (Opsional tapi bagus buat kebersihan)
-        if ($menu->gambar && file_exists(public_path('images/' . $menu->gambar))) {
-            @unlink(public_path('images/' . $menu->gambar));
-        }
-
+        // Untuk cara storage, unlink-nya harus ke path storage jika ingin dihapus
+        // Tapi ini opsional, boleh dibiarkan dulu agar tidak menambah error
         $menu->delete();
         return back();
     }
