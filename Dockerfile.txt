@@ -1,0 +1,27 @@
+# Gunakan image PHP 8.3 sesuai versi laptopmu
+FROM php:8.3-apache
+
+# Install extension yang dibutuhkan Laravel & TiDB
+RUN apt-get update && apt-get install -y \
+    libpng-dev libonig-dev libxml2-dev zip unzip libpq-dev \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+
+# Aktifkan mod_rewrite Apache (Penting untuk Laravel)
+RUN a2enmod rewrite
+
+# Set Working Directory
+WORKDIR /var/www/html
+COPY . .
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN composer install --no-dev --optimize-autoloader
+
+# Atur izin folder storage agar bisa menulis data
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Port default Apache
+EXPOSE 80
+
+# Jalankan Apache
+CMD ["apache2-foreground"]
