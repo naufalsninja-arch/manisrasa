@@ -240,7 +240,7 @@
                 <tr>
                     <td>
                         @if($menu->gambar)
-                            <img src="{{ asset('images/'.$menu->gambar) }}" class="img-preview">
+                            <img src="{{ asset('storage/images/'.$menu->gambar) }}" class="img-preview">
                         @else
                             <div class="img-preview" style="background:#f1f5f9; display:flex; align-items:center; justify-content:center; color:#cbd5e1;">NO IMG</div>
                         @endif
