@@ -1,33 +1,33 @@
-# Gunakan image PHP 8.3 sesuai versi laptopmu
+# 1. Gunakan image PHP 8.3 dengan Apache
 FROM php:8.3-apache
 
-# Install extension yang dibutuhkan Laravel & TiDB
+# 2. Install extension yang dibutuhkan Laravel & TiDB
 RUN apt-get update && apt-get install -y \
     libpng-dev libonig-dev libxml2-dev zip unzip libpq-dev \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# --- BAGIAN PENTING: Arahkan Apache ke folder /public ---
+# 3. Arahkan Apache ke folder /public agar Laravel bisa terbuka
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
-# --------------------------------------------------------
 
-# Aktifkan mod_rewrite Apache (Penting untuk Laravel)
+# 4. Aktifkan mod_rewrite Apache untuk routing Laravel
 RUN a2enmod rewrite
 
-# Set Working Directory
+# 5. Set folder kerja dan copy file project
 WORKDIR /var/www/html
 COPY . .
 
-# Install Composer
+# 6. Install Composer dan library Laravel
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
-# Atur izin folder storage agar bisa menulis data
+# 7. Berikan izin akses folder storage dan cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Port default Apache
+# 8. Buka port 80
 EXPOSE 80
 
-# Jalankan Apache
-CMD ["apache2-foreground"]
+# 9. JALANKAN MIGRASI OTOMATIS & NYALAKAN SERVER
+# Ini akan membuat tabel di TiDB setiap kali aplikasi dijalankan
+CMD php artisan migrate --force && apache2-foreground
