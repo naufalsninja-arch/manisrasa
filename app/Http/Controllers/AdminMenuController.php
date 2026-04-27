@@ -19,9 +19,18 @@ public function store(Request $request)
 
     if ($request->hasFile('gambar')) {
         $imageName = time() . '.' . $request->gambar->extension();
-        
-        // Simpan LANGSUNG ke public/images
-        $request->gambar->move(public_path('images'), $imageName);
+        $path = public_path('images');
+
+        // 1. Cek apakah folder ada, jika tidak ada buat foldernya
+        if (!file_exists($path)) {
+            mkdir($path, 0777, true);
+        }
+
+        // 2. PAKSA izin folder menjadi 'Bisa Ditulis' (Read/Write/Execute)
+        chmod($path, 0777);
+
+        // 3. Pindahkan filenya
+        $request->gambar->move($path, $imageName);
     }
 
     Menu::create([
