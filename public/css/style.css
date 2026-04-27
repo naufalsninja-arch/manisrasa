@@ -1,0 +1,38 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 50px;
+    align-items: center;
+}
+
+.navbar nav a {
+    margin: 0 15px;
+    text-decoration: none;
+    color: black;
+}
+
+/* Hero */
+.hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 60px;
+}
+
+.hero-text h1 {
+    font-size: 40px;
+}
+
+.btn {
+    padding: 10px 20px;
+    background: pink;
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+}
