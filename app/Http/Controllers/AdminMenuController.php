@@ -15,41 +15,38 @@ class AdminMenuController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $imageName = null;
-        if ($request->hasFile('gambar')) {
-            $imageName = time() . '.' . $request->gambar->extension();
-            // Simpan langsung ke public/images (Konsisten)
-            $request->gambar->move(public_path('images'), $imageName);
-        }
-
-        Menu::create([
-            'nama_menu' => $request->nama_menu,
-            'deskripsi' => $request->deskripsi,
-            'harga' => $request->harga,
-            'gambar' => $imageName
-        ]);
-        return back();
+{
+    $imageName = null;
+    if ($request->hasFile('gambar')) {
+        $imageName = time() . '.' . $request->gambar->extension();
+        // Simpan ke storage/app/public/images
+        $request->file('gambar')->storeAs('public/images', $imageName);
     }
 
-    public function update(Request $request, $id)
-    {
-        $menu = Menu::find($id);
-        $data = $request->all();
+    Menu::create([
+        'nama_menu' => $request->nama_menu,
+        'deskripsi' => $request->deskripsi,
+        'harga' => $request->harga,
+        'gambar' => $imageName
+    ]);
+    return back();
+}
 
-        if ($request->hasFile('gambar')) {
-            $imageName = time() . '.' . $request->gambar->extension();
-            // SAMAKAN: Pakai move ke public/images, jangan storeAs
-            $request->gambar->move(public_path('images'), $imageName);
-            $data['gambar'] = $imageName;
-        } else {
-            // Tetap pakai gambar lama jika tidak ada upload baru
-            unset($data['gambar']);
-        }
-
-        $menu->update($data);
-        return back();
+public function update(Request $request, $id)
+{
+    $menu = Menu::find($id);
+    $data = $request->all();
+    if ($request->hasFile('gambar')) {
+        $imageName = time() . '.' . $request->gambar->extension();
+        // Simpan ke storage/app/public/images
+        $request->file('gambar')->storeAs('public/images', $imageName);
+        $data['gambar'] = $imageName;
+    } else {
+        unset($data['gambar']);
     }
+    $menu->update($data);
+    return back();
+}
 
     public function destroy($id)
     {
