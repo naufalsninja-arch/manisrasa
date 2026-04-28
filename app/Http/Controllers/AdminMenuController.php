@@ -4,60 +4,83 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Menu;
-use Illuminate\Support\Facades\File;
+use Cloudinary\Cloudinary;
 
 class AdminMenuController extends Controller
 {
+    protected $cloudinary;
+
+    // 🔧 Constructor biar tidak bikin object berulang
+    public function __construct()
+    {
+        $this->cloudinary = new Cloudinary(env('CLOUDINARY_URL'));
+    }
+
     public function index()
     {
         $menus = Menu::all();
         return view('admin.adminmenu', compact('menus'));
     }
 
+    // 🚀 STORE (Tambah menu)
     public function store(Request $request)
-{
-    $imageName = null;
-    if ($request->hasFile('gambar')) {
-        $imageName = time() . '.' . $request->gambar->extension();
-        // Simpan ke storage/app/public/images
-        $request->file('gambar')->storeAs('public/images', $imageName);
-    }
-
-    Menu::create([
-        'nama_menu' => $request->nama_menu,
-        'deskripsi' => $request->deskripsi,
-        'harga' => $request->harga,
-        'gambar' => $imageName
-    ]);
-    return back();
-}
-
-public function update(Request $request, $id)
-{
-    $menu = Menu::find($id);
-    $data = $request->all();
-    if ($request->hasFile('gambar')) {
-        $imageName = time() . '.' . $request->gambar->extension();
-        // Simpan ke storage/app/public/images
-        $request->file('gambar')->storeAs('public/images', $imageName);
-        $data['gambar'] = $imageName;
-    } else {
-        unset($data['gambar']);
-    }
-    $menu->update($data);
-    return back();
-}
-
-    public function destroy($id)
     {
-        $menu = Menu::find($id);
-        
-        // Hapus file di folder public/images agar tidak menumpuk (Opsional)
-        if ($menu->gambar && file_exists(public_path('images/' . $menu->gambar))) {
-            @unlink(public_path('images/' . $menu->gambar));
+        $request->validate([
+            'nama_menu' => 'required',
+            'harga' => 'required',
+            'gambar' => 'required|image|max:2048'
+        ]);
+
+        $imageUrl = null;
+
+        if ($request->hasFile('gambar')) {
+            $result = $this->cloudinary->uploadApi()->upload(
+                $request->file('gambar')->getRealPath()
+            );
+
+            $imageUrl = $result['secure_url'];
         }
 
+        Menu::create([
+            'nama_menu' => $request->nama_menu,
+            'deskripsi' => $request->deskripsi,
+            'harga' => $request->harga,
+            'gambar' => $imageUrl
+        ]);
+
+        return back()->with('success', 'Menu berhasil ditambahkan');
+    }
+
+    // ✏️ UPDATE
+    public function update(Request $request, $id)
+    {
+        $menu = Menu::findOrFail($id);
+
+        $data = $request->only(['nama_menu', 'deskripsi', 'harga']);
+
+        if ($request->hasFile('gambar')) {
+            $result = $this->cloudinary->uploadApi()->upload(
+                $request->file('gambar')->getRealPath()
+            );
+
+            $data['gambar'] = $result['secure_url'];
+        }
+
+        $menu->update($data);
+
+        return back()->with('success', 'Menu berhasil diupdate');
+    }
+
+    // 🗑️ DELETE
+    public function destroy($id)
+    {
+        $menu = Menu::findOrFail($id);
+
+        // ❌ Tidak perlu unlink lagi (bukan file lokal)
+        // Kalau mau advanced: bisa delete dari Cloudinary juga
+
         $menu->delete();
-        return back();
+
+        return back()->with('success', 'Menu berhasil dihapus');
     }
 }
