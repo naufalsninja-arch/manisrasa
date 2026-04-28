@@ -6,17 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-   protected $fillable = [
-    'nama',
-    'whatsapp',
-    'produk',
-    'varian',
-    'jumlah',
-    'tanggal',
-    'jam',
-    'pengiriman',
-    'alamat',
-    'catatan',
-    'status'
-];
+    // Tambahkan ini agar Laravel tidak menunggu ID otomatis dari TiDB
+    public $incrementing = false; 
+    protected $keyType = 'int';
+
+    protected $fillable = [
+        'id', // Tambahkan 'id' di sini agar bisa diisi manual
+        'nama',
+        'whatsapp',
+        'produk',
+        'varian',
+        'jumlah',
+        'tanggal',
+        'jam',
+        'pengiriman',
+        'alamat',
+        'catatan',
+        'status'
+    ];
 }
