@@ -74,8 +74,8 @@ Route::prefix('admin')->group(function () {
         // MENU CRUD
         Route::get('/menu', [AdminMenuController::class, 'index']);
         Route::post('/menu/store', [AdminMenuController::class, 'store']);
-        Route::post('/menu/update/{id}', [AdminMenuController::class, 'update']);
-        Route::get('/menu/delete/{id}', [AdminMenuController::class, 'destroy']);
+        Route::put('/menu/update/{id}', [AdminMenuController::class, 'update']);
+        Route::delete('/menu/delete/{id}', [AdminMenuController::class, 'destroy']);
 
         // ORDER ADMIN
         Route::get('/order', [OrderController::class, 'adminIndex']);
