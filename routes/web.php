@@ -81,9 +81,5 @@ Route::prefix('admin')->group(function () {
         Route::get('/order', [OrderController::class, 'adminIndex']);
         Route::post('/order/update-status/{id}', [OrderController::class, 'updateStatus']);
     });
-    Route::get('/gas-link', function () {
-    Artisan::call('storage:link');
-    return "✅ Jalur gambar berhasil dibuat! Silakan cek menu kembali.";
-});
 
 });
