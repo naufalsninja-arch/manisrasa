@@ -104,7 +104,7 @@
 
             <!-- GAMBAR -->
             @if($menu->gambar)
-                <img src="{{ asset('images/'.$menu->gambar) }}" alt="{{ $menu->nama_menu }}">
+                <img src="{{ $menu->gambar }}" alt="{{ $menu->nama_menu }}">
             @else
                 <img src="https://via.placeholder.com/300x200?text=No+Image">
             @endif
