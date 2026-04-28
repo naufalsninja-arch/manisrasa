@@ -17,6 +17,11 @@
             color: white;
             height: 100vh;
             padding: 20px;
+            /* TAMBAHKAN INI */
+            position: fixed; /* Mengunci posisi agar tidak ikut tergeser */
+            top: 0;
+            left: 0;
+            overflow-y: auto; /* Jika menu sidebar sangat banyak, dia bisa di-scroll sendiri */
         }
 
         .sidebar h2 {
@@ -41,6 +46,9 @@
             flex: 1;
             padding: 20px;
             background: #f5f5f5;
+            /* TAMBAHKAN INI */
+            margin-left: 260px; /* Lebar sidebar (220px) + padding sidebar (20px*2) */
+            min-height: 100vh;
         }
     </style>
 </head>
