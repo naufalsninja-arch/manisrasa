@@ -10,7 +10,6 @@ class AdminMenuController extends Controller
 {
     protected $cloudinary;
 
-    // 🔧 Constructor biar tidak bikin object berulang
     public function __construct()
     {
         $this->cloudinary = new Cloudinary(env('CLOUDINARY_URL'));
@@ -18,16 +17,18 @@ class AdminMenuController extends Controller
 
     public function index()
     {
-        $menus = Menu::all();
+        // Optional: terbaru di atas
+        $menus = Menu::latest()->get();
         return view('admin.adminmenu', compact('menus'));
     }
 
-    // 🚀 STORE (Tambah menu)
+    // 🚀 STORE
     public function store(Request $request)
     {
         $request->validate([
-            'nama_menu' => 'required',
-            'harga' => 'required',
+            'nama_menu' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'harga' => 'required|numeric',
             'gambar' => 'required|image|max:2048'
         ]);
 
@@ -56,6 +57,14 @@ class AdminMenuController extends Controller
     {
         $menu = Menu::findOrFail($id);
 
+        // 🔥 VALIDASI (ini yang sebelumnya kurang)
+        $request->validate([
+            'nama_menu' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'harga' => 'required|numeric',
+            'gambar' => 'nullable|image|max:2048'
+        ]);
+
         $data = $request->only(['nama_menu', 'deskripsi', 'harga']);
 
         if ($request->hasFile('gambar')) {
@@ -76,8 +85,7 @@ class AdminMenuController extends Controller
     {
         $menu = Menu::findOrFail($id);
 
-        // ❌ Tidak perlu unlink lagi (bukan file lokal)
-        // Kalau mau advanced: bisa delete dari Cloudinary juga
+        // (Optional) Kalau mau hapus dari Cloudinary juga bisa nanti
 
         $menu->delete();
 
