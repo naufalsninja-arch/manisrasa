@@ -61,7 +61,7 @@ class OrderController extends Controller
 
         // Redirect ke WhatsApp jika tombol yang diklik adalah 'wa'
         if ($request->action == 'wa') {
-            return redirect("https://wa.me/628124124?text=$pesan");
+            return redirect("https://wa.me/6281283381375?text=$pesan");
         }
 
         return redirect('/')->with('success', 'Pesanan berhasil disimpan!');
